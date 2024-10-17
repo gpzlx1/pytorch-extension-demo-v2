@@ -53,7 +53,7 @@ torch::Tensor PopcCUDA(torch::Tensor query, torch::Tensor key) {
 
   torch::Tensor output = torch::empty(
       {bsz, query_head, seq_len, 1},
-      torch::TensorOptions().dtype(torch::kInt32).device(torch::kCUDA));
+      torch::TensorOptions().dtype(torch::kInt32).device(query.device()));
 
   uint32_t key_head_stride = key.stride(1);
   uint32_t query_head_stride = query.stride(1);
