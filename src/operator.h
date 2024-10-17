@@ -5,3 +5,4 @@
 #include <torch/script.h>
 
 torch::Tensor AddCUDA(torch::Tensor a, torch::Tensor b, torch::Tensor c);
+torch::Tensor PopcCUDA(torch::Tensor query, torch::Tensor key);
