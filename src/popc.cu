@@ -1,3 +1,4 @@
+#include <ATen/cuda/CUDAContext.h>
 #include "operator.h"
 
 __device__ int32_t popc(int32_t value) { return __popc(value); }
@@ -64,14 +65,16 @@ torch::Tensor PopcCUDA(torch::Tensor query, torch::Tensor key) {
   dim3 grid((seq_len + BLOCK_M - 1) / BLOCK_M, total_head);
   dim3 block(BLOCK_M);
 
+  cudaStream_t stream = c10::cuda::getCurrentCUDAStream(query.device().index());
+
   if (query.dtype() == torch::kInt32) {
-    popc_kernel<int32_t><<<grid, block>>>(
+    popc_kernel<int32_t><<<grid, block, 0, stream>>>(
         query.data_ptr<int32_t>(), key.data_ptr<int32_t>(),
         output.data_ptr<int32_t>(), num_key_group, query_head_stride,
         key_head_stride, output_head_stride, seq_len, dim);
 
   } else if (query.dtype() == torch::kInt64) {
-    popc_kernel<int64_t><<<grid, block>>>(
+    popc_kernel<int64_t><<<grid, block, 0, stream>>>(
         query.data_ptr<int64_t>(), key.data_ptr<int64_t>(),
         output.data_ptr<int32_t>(), num_key_group, query_head_stride,
         key_head_stride, output_head_stride, seq_len, dim);
